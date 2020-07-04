@@ -24,7 +24,9 @@ const colorize = (str) => console.log(chalk[({
 module.exports = function WebpackLoader() {
   const options = (this.options && this.options.eslint) || this.query || {};
 
-  options.watch.forEach((elm) => this.addContextDependency(elm));
+  if (options.watch && Array.isArray(options.watch)) {
+    options.watch.forEach((elm) => this.addContextDependency(elm));
+  }
 
   colorize(execSync(options.execute).toString());
 
