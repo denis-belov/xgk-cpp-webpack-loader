@@ -5,41 +5,42 @@ func-style,
 max-len,
 no-console,
 no-sync,
+id-match,
 */
 
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 
-const execSync = (cmd) => new Promise((resolve) => exec(cmd, { maxBuffer: 0xFFFFFFFF }, (err_, stdout) => resolve([ err_, stdout ])));
-
-const colorize = (out) => out.forEach((elm) => (!elm || elm.toString().split('\r\n').forEach((str) => console.log(chalk[({
+const colorize = (str) => console.log(chalk[({
   'error': 'red',
   warning: 'yellow',
   note: 'grey',
   undefined: 'blue',
-})[(str.toLowerCase().match(/error|warning|note/) || [])[0]]](str)))));
+})[(str.toLowerCase().match(/error|warning|note/) || [])[0]]](str));
 
 let watch = true;
 
-module.exports = async function WebpackLoader() {
+module.exports = function WebpackLoader() {
   const options = (this.options && this.options.eslint) || this.query || {};
+
+  options.watch.forEach((elm) => this.addContextDependency(elm));
 
   if (watch) {
     watch = false;
 
-    chokidar.watch(options.watch).on('all', (event, path_) => {
+    options.watch.forEach((elm) => chokidar.watch(elm).on('all', (event, path_) => {
       if (path.join(__dirname, path_) !== options.entry) {
         console.log(chalk.blue(event, path_));
 
-        fs.writeFileSync(options.entry, fs.readFileSync(options.entry, 'utf8'), 'utf8');
+        colorize(execSync(options.execute).toString());
       }
-    });
+    }));
   }
 
-  colorize(await execSync(options.execute));
+  colorize(execSync(options.execute).toString());
 
   return `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
 };
