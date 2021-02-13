@@ -43,8 +43,6 @@ const colorize = (text) => {
 
 module.exports = function WebpackLoader(source) {
 
-	// console.log(this);
-
 	const [ parsed_comments ] =
 		comment_parser
 			.parse(source)
@@ -70,11 +68,6 @@ module.exports = function WebpackLoader(source) {
 
 			switch (tag.type) {
 
-			case 'make':
-
-				options.make = tag.name;
-				break;
-
 			case 'makefile':
 
 				options.makefile = path.join(this.rootContext, tag.name);
@@ -90,6 +83,11 @@ module.exports = function WebpackLoader(source) {
 				options.watch_directories.push(path.join(this.rootContext, tag.name));
 				break;
 
+			case 'watch_directories':
+
+				options.watch_directories.push(...(tag.name).split(' ').map((dir) => path.join(this.rootContext, dir)));
+				break;
+
 			default:
 			}
 		});
@@ -99,9 +97,12 @@ module.exports = function WebpackLoader(source) {
 			options.watch_directories.forEach((elm) => this.addContextDependency(elm));
 		}
 
-		console.log(options);
+		const { dir, base } = path.parse(options.makefile);
 
-		colorize(execSync(`${ options.make } ${ options.makefile }`).toString());
+		colorize(
+
+			execSync(`cd ${ dir } && make -f ${ base }`).toString(),
+		);
 
 		result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
 	}
