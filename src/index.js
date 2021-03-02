@@ -48,7 +48,7 @@ module.exports = function WebpackLoader(source) {
 			.parse(source)
 			.filter((comment) => comment.description.includes('@xgk/cpp-webpack-loader'));
 
-	let result = '';
+	let result = new ArrayBuffer();
 
 	if (parsed_comments) {
 
@@ -104,7 +104,30 @@ module.exports = function WebpackLoader(source) {
 			execSync(`cd ${ dir } && make -f ${ base }`).toString(),
 		);
 
-		result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
+		const buffer =
+			Array.prototype.slice.call(
+
+				fs.readFileSync(path.resolve(options.target)),
+			);
+
+		switch (path.parse(options.target).ext) {
+
+		case '.wasm':
+
+			result = `export default new Uint8Array([ ${ buffer } ]).buffer;`;
+
+			break;
+
+		case '.js':
+
+			result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
+
+			break;
+
+		default:
+		}
+
+		result = `export default new Uint8Array([ ${ buffer } ]).buffer;`;
 	}
 
 	return result;
