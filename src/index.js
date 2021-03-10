@@ -4,36 +4,46 @@ const { execSync } = require('child_process');
 const chalk = require('chalk');
 const comment_parser = require('../node_modules/comment-parser/lib');
 
+
+
 const colorize = (text) => {
 
 	let color = null;
 
 	switch ((text.toLowerCase().match(/error|failed|warning|note/) || [])[0]) {
 
-	case 'error':
+	case 'error': {
 
 		color = 'red';
-		break;
 
-	case 'failed':
+		break;
+	}
+
+	case 'failed': {
 
 		color = 'red';
-		break;
 
-	case 'warning':
+		break;
+	}
+
+	case 'warning': {
 
 		color = 'yellow';
-		break;
 
-	case 'note':
+		break;
+	}
+
+	case 'note': {
 
 		color = 'grey';
-		break;
 
-	default:
+		break;
+	}
+
+	default: {
 
 		color = 'blue';
-		break;
+	}
 	}
 
 	chalk[color](text);
@@ -48,7 +58,7 @@ module.exports = function WebpackLoader(source) {
 			.parse(source)
 			.filter((comment) => comment.description.includes('@xgk/cpp-webpack-loader'));
 
-	let result = new ArrayBuffer();
+
 
 	if (parsed_comments) {
 
@@ -56,53 +66,78 @@ module.exports = function WebpackLoader(source) {
 
 			make: null,
 			makefile: null,
+			execute: null,
 			target: null,
 			watch_directories: [],
 		};
 
-		// if (options.watch_file && Array.isArray(options.watch_file)) {
-		// 	options.watch_file.forEach((elm) => this.addDependency(elm));
-		// }
+
 
 		parsed_comments.tags.forEach((tag) => {
 
 			switch (tag.type) {
 
-			case 'makefile':
+			case 'makefile': {
 
 				options.makefile = path.join(this.rootContext, tag.name);
-				break;
 
-			case 'target':
+				break;
+			}
+
+			case 'execute': {
+
+				options.execute = tag.name;
+
+				break;
+			}
+
+			case 'target': {
 
 				options.target = path.join(this.rootContext, tag.name);
-				break;
 
-			case 'watch_directory':
-
-				options.watch_directories.push(path.join(this.rootContext, tag.name));
 				break;
+			}
 
 			case 'watch_directories':
 
 				options.watch_directories.push(...(tag.name).split(' ').map((dir) => path.join(this.rootContext, dir)));
+
 				break;
 
 			default:
 			}
 		});
 
-		if (options.watch_directories && Array.isArray(options.watch_directories) && options.watch_directories.length) {
 
-			options.watch_directories.forEach((elm) => this.addContextDependency(elm));
+
+		options.watch_directories.forEach((elm) => this.addContextDependency(elm));
+
+
+
+		// If "makefile" is defined it will be used rather than "execute" command will be executed
+
+		if (options.makefile) {
+
+			const { dir, base } = path.parse(options.makefile);
+
+			colorize(
+
+				execSync(`cd ${ dir } && make -f ${ base }`).toString(),
+			);
+		}
+		else if (options.execute) {
+
+			colorize(
+
+				execSync(`${ options.makefile }`).toString(),
+			);
 		}
 
-		const { dir, base } = path.parse(options.makefile);
 
-		colorize(
 
-			execSync(`cd ${ dir } && make -f ${ base }`).toString(),
-		);
+		let result = null;
+
+
 
 		const buffer =
 			Array.prototype.slice.call(
@@ -112,23 +147,28 @@ module.exports = function WebpackLoader(source) {
 
 		switch (path.parse(options.target).ext) {
 
-		case '.wasm':
+		case '.wasm': {
 
-			result = `export default new Uint8Array([ ${ buffer } ]).buffer;`;
+			result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
 
 			break;
+		}
 
-		case '.js':
+		case '.js': {
 
 			result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
 
 			break;
-
-		default:
 		}
 
-		result = `export default new Uint8Array([ ${ buffer } ]).buffer;`;
+		default: {
+
+			result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
+		}
+		}
+
+		return result;
 	}
 
-	return result;
+	return '';
 };
