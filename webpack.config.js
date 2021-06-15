@@ -1,21 +1,21 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-module.exports = {
-
+module.exports =
+{
 	target: 'node',
 
-	// resolve: {
-
+	// resolve:
+	// {
 	// 	extensions: [ '.js' ],
 	// 	modules: [ './node_modules' ],
 	// 	descriptionFiles: [ 'package.json' ],
 	// },
 
-	// module: {
-
-	// 	rules: [
-
+	// module:
+	// {
+	// 	rules:
+	// 	[
 	// 		{
 	// 			test: /\.js$/,
 	// 			exclude: /node_modules/,
@@ -24,16 +24,16 @@ module.exports = {
 	// 	],
 	// },
 
-	output: {
-
+	output:
+	{
 		path: path.join(__dirname, 'build'),
 		filename: 'index.js',
 		library: 'xgk@cpp-webpack-loader',
 		libraryTarget: 'umd',
 	},
 
-	plugins: [
-
+	plugins:
+	[
 		new CleanWebpackPlugin(),
 	],
 };
