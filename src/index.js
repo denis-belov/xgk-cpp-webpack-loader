@@ -62,13 +62,13 @@ module.exports = function WebpackLoader(source)
 
 	const options =
 	{
-		make: null,
-		makefile: null,
+		// make: null,
+		// makefile: null,
 		execute: null,
 		target: null,
 		watchDirectories: [],
 		watchFiles: [],
-		watchFiles2: [],
+		// watchFiles2: [],
 	};
 
 	Object.assign(options, loader_options);
@@ -81,13 +81,6 @@ module.exports = function WebpackLoader(source)
 			{
 				switch (tag.name)
 				{
-				case 'makefile':
-				{
-					options.makefile = path.join(this.rootContext, tag.description);
-
-					break;
-				}
-
 				case 'execute':
 				{
 					options.execute = tag.description;
@@ -97,7 +90,7 @@ module.exports = function WebpackLoader(source)
 
 				case 'target':
 				{
-					options.target = path.join(this.rootContext, tag.description);
+					options.target = tag.description;
 
 					break;
 				}
@@ -107,16 +100,24 @@ module.exports = function WebpackLoader(source)
 
 					options[tag.name].push(
 
-						...JSON.parse(tag.description).map((dir) => path.join(this.rootContext, dir)),
+						...JSON.parse(tag.description),
 					);
 
 					break;
+
+				// case 'watchFiles2':
+
+				// 	options.watchFiles2.push(
+
+				// 		...JSON.parse(tag.description),
+				// 	);
+
+				// 	break;
 
 				default:
 				}
 			},
 		);
-
 	}
 
 
@@ -127,22 +128,48 @@ module.exports = function WebpackLoader(source)
 
 
 
+	// const _execute = () =>
+	// {
+	// 	if (options.execute)
+	// 	{
+	// 		colorize(
+
+	// 			execSync(`${ options.execute }`).toString(),
+	// 		);
+	// 	}
+
+	// };
+
+
+
+	// options.watchFiles2.forEach(
+
+	// 	({ file, execute }) =>
+	// 	{
+	// 		// fs.unwatchFile(file);
+
+	// 		fs.watch(
+
+	// 			file,
+
+	// 			// { interval: 100 },
+
+	// 			() =>
+	// 			{
+	// 				colorize(execSync(execute).toString());
+
+	// 				_execute();
+	// 			},
+	// 		);
+	// 	},
+	// );
+
+	// console.log(options.watchFiles2);
+
 	if (options.execute)
 	{
-		colorize(
-
-			execSync(`${ options.execute }`).toString(),
-		);
-	}
-
-	if (options.makefile)
-	{
-		const { dir, base } = path.parse(options.makefile);
-
-		colorize(
-
-			execSync(`cd ${ dir } && make -f ${ base }`).toString(),
-		);
+		console.log(options.execute);
+		colorize(execSync(`${ options.execute }`).toString());
 	}
 
 
