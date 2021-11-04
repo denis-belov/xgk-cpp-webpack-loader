@@ -1,53 +1,53 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const chalk = require('chalk');
+// const chalk = require('chalk');
 const comment_parser = require('../node_modules/comment-parser/lib');
 
 
 
-const colorize = (text) =>
-{
-	let color = null;
+// const colorize = (text) =>
+// {
+// 	let color = null;
 
-	switch ((text.toLowerCase().match(/error|failed|warning|note/) || [])[0])
-	{
-	case 'error':
-	{
-		color = 'red';
+// 	switch ((text.toLowerCase().match(/error|failed|warning|note/) || [])[0])
+// 	{
+// 	case 'error':
+// 	{
+// 		color = 'red';
 
-		break;
-	}
+// 		break;
+// 	}
 
-	case 'failed':
-	{
-		color = 'red';
+// 	case 'failed':
+// 	{
+// 		color = 'red';
 
-		break;
-	}
+// 		break;
+// 	}
 
-	case 'warning':
-	{
-		color = 'yellow';
+// 	case 'warning':
+// 	{
+// 		color = 'yellow';
 
-		break;
-	}
+// 		break;
+// 	}
 
-	case 'note':
-	{
-		color = 'grey';
+// 	case 'note':
+// 	{
+// 		color = 'grey';
 
-		break;
-	}
+// 		break;
+// 	}
 
-	default:
-	{
-		color = 'blue';
-	}
-	}
+// 	default:
+// 	{
+// 		color = 'blue';
+// 	}
+// 	}
 
-	chalk[color](text);
-};
+// 	chalk[color](text);
+// };
 
 
 
@@ -75,8 +75,8 @@ module.exports = function WebpackLoader(source)
 
 	if (parsed_comments)
 	{
-		parsed_comments.tags.forEach(
-
+		parsed_comments.tags.forEach
+		(
 			(tag) =>
 			{
 				switch (tag.name)
@@ -98,27 +98,32 @@ module.exports = function WebpackLoader(source)
 				case 'watchDirectories':
 				case 'watchFiles':
 
-					options[tag.name].push(
-
+					options[tag.name].push
+					(
 						...JSON.parse(tag.description),
 					);
 
 					break;
 
-				// case 'watchFiles2':
+					// case 'watchFiles2':
 
-				// 	options.watchFiles2.push(
+					// 	options.watchFiles2.push(
 
-				// 		...JSON.parse(tag.description),
-				// 	);
+					// 		...JSON.parse(tag.description),
+					// 	);
 
-				// 	break;
+					// 	break;
 
 				default:
 				}
 			},
 		);
 	}
+
+	// if (fs.existsSync(options.target))
+	// {
+	// 	fs.rmdirSync(options.target, { recursive: true });
+	// }
 
 
 
@@ -168,8 +173,9 @@ module.exports = function WebpackLoader(source)
 
 	if (options.execute)
 	{
-		console.log(options.execute);
-		colorize(execSync(`${ options.execute }`).toString());
+		// console.log(options.execute);
+		console.log(execSync(`${ options.execute }`, { encoding: 'utf8' }));
+		// colorize(execSync(`${ options.execute }`, { encoding: 'utf8' }));
 	}
 
 
@@ -179,8 +185,8 @@ module.exports = function WebpackLoader(source)
 
 
 	const buffer =
-		Array.prototype.slice.call(
-
+		Array.prototype.slice.call
+		(
 			fs.readFileSync(path.resolve(options.target)),
 		);
 
