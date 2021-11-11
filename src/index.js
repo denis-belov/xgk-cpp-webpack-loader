@@ -180,7 +180,7 @@ module.exports = function WebpackLoader(source)
 
 
 
-	let result = null;
+	// let result = null;
 
 
 
@@ -190,27 +190,29 @@ module.exports = function WebpackLoader(source)
 			fs.readFileSync(path.resolve(options.target)),
 		);
 
-	switch (path.parse(options.target).ext)
-	{
-	case '.wasm':
-	{
-		result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
+	// switch (path.parse(options.target).ext)
+	// {
+	// case '.wasm':
+	// {
+	// 	result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
 
-		break;
-	}
+	// 	break;
+	// }
 
-	case '.js':
-	{
-		result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
+	// case '.js':
+	// {
+	// 	result = `/*eslint-disable*/${ fs.readFileSync(path.resolve(options.target), 'utf8') }`;
 
-		break;
-	}
+	// 	break;
+	// }
 
-	default:
-	{
-		result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
-	}
-	}
+	// default:
+	// {
+	// 	result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
+	// }
+	// }
+
+	const result = `/*eslint-disable*/ export default new Uint8Array([ ${ buffer } ]).buffer;`;
 
 	return result;
 };
